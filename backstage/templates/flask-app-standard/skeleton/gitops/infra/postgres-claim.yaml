@@ -1,0 +1,11 @@
+apiVersion: idp.platform.io/v1alpha1
+kind: PostgresInstance
+metadata:
+  name: {{appName}}-pg
+  namespace: pe-dev
+spec:
+  parameters:
+    app: {{appName}}
+    env: dev
+    owner: {{owner}}
+    size: {{size}}

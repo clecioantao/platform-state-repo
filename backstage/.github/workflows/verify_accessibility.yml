@@ -1,0 +1,40 @@
+name: Accessibility
+on:
+  # NOTE: If you change these you must update verify_accessibility-noop.yml as well
+  pull_request:
+    branches: [master]
+    paths:
+      - 'lighthouserc.js'
+      - '.github/workflows/verify_accessibility.yml'
+      - 'plugins/catalog/src/**'
+      - 'plugins/catalog-react/src/**'
+      - 'plugins/techdocs/src/**'
+      - 'plugins/techdocs-react/src/**'
+      - 'plugins/scaffolder/src/**'
+      - 'plugins/scaffolder-react/src/**'
+      - 'plugins/search/src/**'
+      - 'plugins/search-react/src/**'
+jobs:
+  lhci:
+    name: Accessibility
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version: 22.x
+      - name: yarn install
+        uses: backstage/actions/yarn-install@b3c1841fd69e1658ac631afafd0fb140a2309024 # v0.6.17
+        with:
+          cache-prefix: ${{ runner.os }}-v22.x
+      - name: run Lighthouse CI
+        run: |
+          yarn dlx @lhci/cli@0.11.x autorun
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

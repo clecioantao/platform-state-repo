@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: platform
+  namespace: argocd
+spec:
+  description: "Platform bootstrap and contracts"
+  sourceRepos:
+    - "*"
+  destinations:
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+    - namespace: pe-dev
+      server: https://kubernetes.default.svc
+    - namespace: pe-prod
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"

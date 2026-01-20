@@ -1,0 +1,8 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: platform-templates
+spec:
+  type: url
+  targets:
+    - https://github.com/<org>/platform-state-repo/blob/main/backstage/templates/flask-app-standard/template.yaml

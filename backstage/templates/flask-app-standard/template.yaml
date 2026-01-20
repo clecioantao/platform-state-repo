@@ -1,0 +1,41 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: flask-app-standard
+  title: Flask App – Standard
+  description: "Cria uma aplicação Flask + GitOps manifests + Claims (DEV) no platform-state-repo"
+spec:
+  owner: platform-team
+  type: service
+
+  parameters:
+    - title: Informações da aplicação
+      required:
+        - appName
+        - owner
+        - environment
+      properties:
+        appName:
+          title: Nome da aplicação (slug)
+          type: string
+          description: "ex: payments-api"
+        owner:
+          title: Time/Owner
+          type: string
+          description: "ex: team-a"
+        environment:
+          title: Ambiente
+          type: string
+          enum: ["dev", "prod"]
+        size:
+          title: Sizing
+          type: string
+          enum: ["small", "medium", "large"]
+          default: "small"
+
+  steps: []
+  output:
+    text:
+      - title: Próximos passos
+        content: |
+          Template ainda será finalizado em um step futuro (Backstage).

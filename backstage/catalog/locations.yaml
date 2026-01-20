@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: platform-state-catalog
+spec:
+  type: url
+  targets:
+    # Catálogo das apps (o Backstage vai ler os catalog-info.yaml gerados)
+    - https://github.com/<org>/platform-state-repo/blob/main/apps/dev/*/catalog-info.yaml
+    - https://github.com/<org>/platform-state-repo/blob/main/apps/prod/*/catalog-info.yaml

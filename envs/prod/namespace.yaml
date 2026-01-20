@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pe-prod
+  labels:
+    idp.platform.io/env: prod

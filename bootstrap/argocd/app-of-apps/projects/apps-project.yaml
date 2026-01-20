@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  description: "Applications and app-scoped infrastructure"
+  sourceRepos:
+    - "*"
+  destinations:
+    - namespace: pe-dev
+      server: https://kubernetes.default.svc
+    - namespace: pe-prod
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
