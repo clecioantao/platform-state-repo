@@ -3,5 +3,12 @@ kind: Kustomization
 resources:
   - ../namespace.yaml
   - platform-marker.yaml
-  # Step 2 vai adicionar: Crossplane contract (XRD/Compositions) e ProviderConfig(s)
 
+  - ../../../bootstrap/crossplane/providers/provider-kubernetes.yaml
+  - ../../../bootstrap/crossplane/providers/providerconfig-incluster.yaml
+
+  - ../../../bootstrap/crossplane/contract/xrd-postgresinstance.yaml
+  - ../../../bootstrap/crossplane/contract/xrd-redisinstance.yaml
+
+  - ../../../bootstrap/crossplane/contract/composition-dev-postgres.yaml
+  - ../../../bootstrap/crossplane/contract/composition-dev-redis.yaml

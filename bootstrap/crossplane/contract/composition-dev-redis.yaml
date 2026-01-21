@@ -1,0 +1,80 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: redis-dev
+  labels:
+    idp.platform.io/env: dev
+spec:
+  compositeTypeRef:
+    apiVersion: idp.platform.io/v1alpha1
+    kind: XRedisInstance
+
+  resources:
+    - name: redis-service
+      base:
+        apiVersion: kubernetes.crossplane.io/v1alpha2
+        kind: Object
+        spec:
+          providerConfigRef:
+            name: incluster
+          forProvider:
+            manifest:
+              apiVersion: v1
+              kind: Service
+              metadata:
+                name: redis
+                namespace: pe-dev
+                labels: {}
+              spec:
+                ports:
+                  - name: tcp
+                    port: 6379
+                    targetPort: 6379
+                selector:
+                  app: redis
+      patches:
+        - fromFieldPath: "spec.parameters.app"
+          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/app"
+        - fromFieldPath: "spec.parameters.env"
+          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/env"
+        - fromFieldPath: "spec.parameters.owner"
+          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/owner"
+
+    - name: redis-deploy
+      base:
+        apiVersion: kubernetes.crossplane.io/v1alpha2
+        kind: Object
+        spec:
+          providerConfigRef:
+            name: incluster
+          forProvider:
+            manifest:
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: redis
+                namespace: pe-dev
+                labels:
+                  app: redis
+              spec:
+                replicas: 1
+                selector:
+                  matchLabels:
+                    app: redis
+                template:
+                  metadata:
+                    labels:
+                      app: redis
+                  spec:
+                    containers:
+                      - name: redis
+                        image: redis:7-alpine
+                        ports:
+                          - containerPort: 6379
+      patches:
+        - fromFieldPath: "spec.parameters.app"
+          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/app"
+        - fromFieldPath: "spec.parameters.env"
+          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/env"
+        - fromFieldPath: "spec.parameters.owner"
+          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/owner"

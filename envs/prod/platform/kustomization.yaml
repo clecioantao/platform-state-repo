@@ -3,5 +3,12 @@ kind: Kustomization
 resources:
   - ../namespace.yaml
   - platform-marker.yaml
-  # Step 2 vai adicionar: Crossplane contract (XRD/Compositions) e política PROD (bloqueado)
 
+  - ../../../bootstrap/crossplane/providers/provider-kubernetes.yaml
+  - ../../../bootstrap/crossplane/providers/providerconfig-incluster.yaml
+
+  - ../../../bootstrap/crossplane/contract/xrd-postgresinstance.yaml
+  - ../../../bootstrap/crossplane/contract/xrd-redisinstance.yaml
+
+  - ../../../bootstrap/crossplane/contract/composition-prod-blocked-postgres.yaml
+  - ../../../bootstrap/crossplane/contract/composition-prod-blocked-redis.yaml

@@ -1,0 +1,42 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xredisinstances.idp.platform.io
+spec:
+  group: idp.platform.io
+  names:
+    kind: XRedisInstance
+    plural: xredisinstances
+  claimNames:
+    kind: RedisInstance
+    plural: redisinstances
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required: ["parameters"]
+              properties:
+                parameters:
+                  type: object
+                  required: ["app", "env", "owner", "size"]
+                  properties:
+                    app:
+                      type: string
+                      minLength: 2
+                      maxLength: 63
+                    env:
+                      type: string
+                      enum: ["dev", "prod"]
+                    owner:
+                      type: string
+                      minLength: 2
+                      maxLength: 63
+                    size:
+                      type: string
+                      enum: ["small", "medium", "large"]

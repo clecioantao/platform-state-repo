@@ -1,0 +1,136 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: postgres-dev
+  labels:
+    idp.platform.io/env: dev
+spec:
+  compositeTypeRef:
+    apiVersion: idp.platform.io/v1alpha1
+    kind: XPostgresInstance
+
+  resources:
+    - name: postgres-secret
+      base:
+        apiVersion: kubernetes.crossplane.io/v1alpha2
+        kind: Object
+        spec:
+          providerConfigRef:
+            name: incluster
+          forProvider:
+            manifest:
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: postgres-credentials
+                namespace: pe-dev
+                labels: {}
+              type: Opaque
+              stringData:
+                POSTGRES_DB: appdb
+                POSTGRES_USER: appuser
+                POSTGRES_PASSWORD: changeme
+      patches:
+        - fromFieldPath: "spec.parameters.app"
+          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/app"
+        - fromFieldPath: "spec.parameters.env"
+          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/env"
+        - fromFieldPath: "spec.parameters.owner"
+          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/owner"
+
+    - name: postgres-service
+      base:
+        apiVersion: kubernetes.crossplane.io/v1alpha2
+        kind: Object
+        spec:
+          providerConfigRef:
+            name: incluster
+          forProvider:
+            manifest:
+              apiVersion: v1
+              kind: Service
+              metadata:
+                name: postgres
+                namespace: pe-dev
+                labels: {}
+              spec:
+                ports:
+                  - name: tcp
+                    port: 5432
+                    targetPort: 5432
+                selector:
+                  app: postgres
+      patches:
+        - fromFieldPath: "spec.parameters.app"
+          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/app"
+        - fromFieldPath: "spec.parameters.env"
+          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/env"
+        - fromFieldPath: "spec.parameters.owner"
+          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/owner"
+
+    - name: postgres-statefulset
+      base:
+        apiVersion: kubernetes.crossplane.io/v1alpha2
+        kind: Object
+        spec:
+          providerConfigRef:
+            name: incluster
+          forProvider:
+            manifest:
+              apiVersion: apps/v1
+              kind: StatefulSet
+              metadata:
+                name: postgres
+                namespace: pe-dev
+                labels:
+                  app: postgres
+              spec:
+                serviceName: postgres
+                replicas: 1
+                selector:
+                  matchLabels:
+                    app: postgres
+                template:
+                  metadata:
+                    labels:
+                      app: postgres
+                  spec:
+                    containers:
+                      - name: postgres
+                        image: postgres:16
+                        ports:
+                          - containerPort: 5432
+                        env:
+                          - name: POSTGRES_DB
+                            valueFrom:
+                              secretKeyRef:
+                                name: postgres-credentials
+                                key: POSTGRES_DB
+                          - name: POSTGRES_USER
+                            valueFrom:
+                              secretKeyRef:
+                                name: postgres-credentials
+                                key: POSTGRES_USER
+                          - name: POSTGRES_PASSWORD
+                            valueFrom:
+                              secretKeyRef:
+                                name: postgres-credentials
+                                key: POSTGRES_PASSWORD
+                        volumeMounts:
+                          - name: data
+                            mountPath: /var/lib/postgresql/data
+                volumeClaimTemplates:
+                  - metadata:
+                      name: data
+                    spec:
+                      accessModes: ["ReadWriteOnce"]
+                      resources:
+                        requests:
+                          storage: 1Gi
+      patches:
+        - fromFieldPath: "spec.parameters.app"
+          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/app"
+        - fromFieldPath: "spec.parameters.env"
+          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/env"
+        - fromFieldPath: "spec.parameters.owner"
+          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/owner"

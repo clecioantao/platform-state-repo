@@ -1,0 +1,11 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: redis-prod-blocked
+  labels:
+    idp.platform.io/env: prod
+spec:
+  compositeTypeRef:
+    apiVersion: idp.platform.io/v1alpha1
+    kind: XRedisInstance
+  # Phase 1: intentionally no resources. PROD is a contract only.
