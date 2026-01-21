@@ -198,6 +198,12 @@ catalog:
       rules:
         - allow: [Template]
 
+    # Platform State Repo
+    - type: url
+      target: https://github.com/<org>/platform-state-repo/blob/main/backstage/catalog/templates.yaml
+    - type: url
+      target: https://github.com/<org>/platform-state-repo/blob/main/backstage/catalog/locations.yaml
+
 scaffolder:
   auditor:
     taskParameterMaxLength: 256

@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps-prod
+  namespace: argocd
+  labels:
+    idp.platform.io/env: prod
+spec:
+  project: apps
+  source:
+    repoURL: https://github.com/clecioantao/platform-state-repo.git
+    targetRevision: main
+    path: apps/prod
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: pe-prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: platform-prod-marker
+  namespace: pe-prod
+  labels:
+    idp.platform.io/env: prod
+data:
+  message: "platform-prod is being managed by Argo CD (Step 1). Crossplane contract comes in Step 2."
+

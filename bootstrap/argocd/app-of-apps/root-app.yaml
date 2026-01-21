@@ -6,7 +6,7 @@ metadata:
 spec:
   project: platform
   source:
-    repoURL: https://github.com/<org>/platform-state-repo.git
+    repoURL: https://github.com/clecioantao/platform-state-repo.git
     targetRevision: main
     path: bootstrap/argocd/app-of-apps
   destination:

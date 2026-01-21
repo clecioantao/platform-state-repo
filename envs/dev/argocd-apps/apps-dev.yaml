@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps-dev
+  namespace: argocd
+  labels:
+    idp.platform.io/env: dev
+spec:
+  project: apps
+  source:
+    repoURL: https://github.com/clecioantao/platform-state-repo.git
+    targetRevision: main
+    path: apps/dev
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: pe-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+

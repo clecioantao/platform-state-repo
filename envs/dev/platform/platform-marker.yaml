@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: platform-dev-marker
+  namespace: pe-dev
+  labels:
+    idp.platform.io/env: dev
+data:
+  message: "platform-dev is being managed by Argo CD (Step 1). Crossplane contract comes in Step 2."
+
