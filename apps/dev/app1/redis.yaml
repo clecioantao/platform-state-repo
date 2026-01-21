@@ -1,0 +1,19 @@
+apiVersion: idp.platform.io/v1alpha1
+kind: RedisInstance
+metadata:
+  name: app1-redis
+  namespace: apps-dev
+spec:
+  compositionSelector:
+    matchLabels:
+      idp.platform.io/provider: kubernetes
+      idp.platform.io/env: dev
+
+  parameters:
+    app: app1
+    env: dev
+    owner: clecio
+    size: small
+
+  writeConnectionSecretToRef:
+    name: app1-redis-conn

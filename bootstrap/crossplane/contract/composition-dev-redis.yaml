@@ -6,11 +6,12 @@ metadata:
     idp.platform.io/provider: kubernetes
     idp.platform.io/env: dev
 spec:
+  mode: Pipeline
+
   compositeTypeRef:
     apiVersion: idp.platform.io/v1alpha1
     kind: XRedisInstance
 
-  mode: Pipeline
   pipeline:
     - step: render-resources
       functionRef:
@@ -41,15 +42,15 @@ spec:
                           targetPort: 6379
             patches:
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.parameters.namespace
+                fromFieldPath: spec.claimRef.namespace
                 toFieldPath: spec.forProvider.manifest.metadata.namespace
 
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.claimRef.name
                 toFieldPath: spec.forProvider.manifest.metadata.name
                 transforms:
-                  - type: string
-                    string:
+                  - string:
+                      type: Format
                       fmt: "%s-redis"
 
               - type: FromCompositeFieldPath
@@ -87,15 +88,15 @@ spec:
                                   name: redis
             patches:
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.parameters.namespace
+                fromFieldPath: spec.claimRef.namespace
                 toFieldPath: spec.forProvider.manifest.metadata.namespace
 
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.claimRef.name
                 toFieldPath: spec.forProvider.manifest.metadata.name
                 transforms:
-                  - type: string
-                    string:
+                  - string:
+                      type: Format
                       fmt: "%s-redis"
 
               - type: FromCompositeFieldPath
