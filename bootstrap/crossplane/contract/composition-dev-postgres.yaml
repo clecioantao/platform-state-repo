@@ -1,15 +1,19 @@
+# bootstrap/crossplane/contract/composition-dev-postgres.yaml
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
   name: postgres-dev
   labels:
+    idp.platform.io/provider: kubernetes
     idp.platform.io/env: dev
 spec:
   compositeTypeRef:
     apiVersion: idp.platform.io/v1alpha1
     kind: XPostgresInstance
 
+  # Resources Mode (clássico) — sem pipeline/functions
   resources:
+    # 1) Secret com credenciais (simples para lab)
     - name: postgres-secret
       base:
         apiVersion: kubernetes.crossplane.io/v1alpha2
@@ -22,22 +26,34 @@ spec:
               apiVersion: v1
               kind: Secret
               metadata:
-                name: postgres-credentials
-                namespace: pe-dev
-                labels: {}
+                name: placeholder
               type: Opaque
               stringData:
-                POSTGRES_DB: appdb
-                POSTGRES_USER: appuser
-                POSTGRES_PASSWORD: changeme
+                username: postgres
+                password: postgres
+                database: appdb
       patches:
-        - fromFieldPath: "spec.parameters.app"
-          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/app"
-        - fromFieldPath: "spec.parameters.env"
-          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/env"
-        - fromFieldPath: "spec.parameters.owner"
-          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/owner"
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.namespace
+          toFieldPath: spec.forProvider.manifest.metadata.namespace
 
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.claimRef.name
+          toFieldPath: spec.forProvider.manifest.metadata.name
+          transforms:
+            - type: string
+              string:
+                fmt: "%s-pg-secret"
+
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.password
+          toFieldPath: spec.forProvider.manifest.stringData.password
+
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.database
+          toFieldPath: spec.forProvider.manifest.stringData.database
+
+    # 2) Service
     - name: postgres-service
       base:
         apiVersion: kubernetes.crossplane.io/v1alpha2
@@ -50,24 +66,32 @@ spec:
               apiVersion: v1
               kind: Service
               metadata:
-                name: postgres
-                namespace: pe-dev
-                labels: {}
+                name: placeholder
               spec:
+                selector:
+                  app: placeholder
                 ports:
-                  - name: tcp
+                  - name: postgres
                     port: 5432
                     targetPort: 5432
-                selector:
-                  app: postgres
       patches:
-        - fromFieldPath: "spec.parameters.app"
-          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/app"
-        - fromFieldPath: "spec.parameters.env"
-          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/env"
-        - fromFieldPath: "spec.parameters.owner"
-          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/owner"
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.namespace
+          toFieldPath: spec.forProvider.manifest.metadata.namespace
 
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.claimRef.name
+          toFieldPath: spec.forProvider.manifest.metadata.name
+          transforms:
+            - type: string
+              string:
+                fmt: "%s-postgres"
+
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.claimRef.name
+          toFieldPath: spec.forProvider.manifest.spec.selector.app
+
+    # 3) StatefulSet
     - name: postgres-statefulset
       base:
         apiVersion: kubernetes.crossplane.io/v1alpha2
@@ -80,42 +104,40 @@ spec:
               apiVersion: apps/v1
               kind: StatefulSet
               metadata:
-                name: postgres
-                namespace: pe-dev
-                labels:
-                  app: postgres
+                name: placeholder
               spec:
-                serviceName: postgres
+                serviceName: placeholder
                 replicas: 1
                 selector:
                   matchLabels:
-                    app: postgres
+                    app: placeholder
                 template:
                   metadata:
                     labels:
-                      app: postgres
+                      app: placeholder
                   spec:
                     containers:
                       - name: postgres
                         image: postgres:16
                         ports:
                           - containerPort: 5432
+                            name: postgres
                         env:
-                          - name: POSTGRES_DB
-                            valueFrom:
-                              secretKeyRef:
-                                name: postgres-credentials
-                                key: POSTGRES_DB
                           - name: POSTGRES_USER
                             valueFrom:
                               secretKeyRef:
-                                name: postgres-credentials
-                                key: POSTGRES_USER
+                                name: placeholder
+                                key: username
                           - name: POSTGRES_PASSWORD
                             valueFrom:
                               secretKeyRef:
-                                name: postgres-credentials
-                                key: POSTGRES_PASSWORD
+                                name: placeholder
+                                key: password
+                          - name: POSTGRES_DB
+                            valueFrom:
+                              secretKeyRef:
+                                name: placeholder
+                                key: database
                         volumeMounts:
                           - name: data
                             mountPath: /var/lib/postgresql/data
@@ -128,9 +150,54 @@ spec:
                         requests:
                           storage: 1Gi
       patches:
-        - fromFieldPath: "spec.parameters.app"
-          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/app"
-        - fromFieldPath: "spec.parameters.env"
-          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/env"
-        - fromFieldPath: "spec.parameters.owner"
-          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/owner"
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.namespace
+          toFieldPath: spec.forProvider.manifest.metadata.namespace
+
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.claimRef.name
+          toFieldPath: spec.forProvider.manifest.metadata.name
+          transforms:
+            - type: string
+              string:
+                fmt: "%s-postgres"
+
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.claimRef.name
+          toFieldPath: spec.forProvider.manifest.spec.serviceName
+          transforms:
+            - type: string
+              string:
+                fmt: "%s-postgres"
+
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.claimRef.name
+          toFieldPath: spec.forProvider.manifest.spec.selector.matchLabels.app
+
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.claimRef.name
+          toFieldPath: spec.forProvider.manifest.spec.template.metadata.labels.app
+
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.claimRef.name
+          toFieldPath: spec.forProvider.manifest.spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.name
+          transforms:
+            - type: string
+              string:
+                fmt: "%s-pg-secret"
+
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.claimRef.name
+          toFieldPath: spec.forProvider.manifest.spec.template.spec.containers[0].env[1].valueFrom.secretKeyRef.name
+          transforms:
+            - type: string
+              string:
+                fmt: "%s-pg-secret"
+
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.claimRef.name
+          toFieldPath: spec.forProvider.manifest.spec.template.spec.containers[0].env[2].valueFrom.secretKeyRef.name
+          transforms:
+            - type: string
+              string:
+                fmt: "%s-pg-secret"

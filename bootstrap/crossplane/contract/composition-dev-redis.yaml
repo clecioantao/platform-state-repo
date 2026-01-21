@@ -1,8 +1,10 @@
+# bootstrap/crossplane/contract/composition-dev-redis.yaml
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
   name: redis-dev
   labels:
+    idp.platform.io/provider: kubernetes
     idp.platform.io/env: dev
 spec:
   compositeTypeRef:
@@ -22,25 +24,32 @@ spec:
               apiVersion: v1
               kind: Service
               metadata:
-                name: redis
-                namespace: pe-dev
-                labels: {}
+                name: placeholder
               spec:
+                selector:
+                  app: placeholder
                 ports:
-                  - name: tcp
+                  - name: redis
                     port: 6379
                     targetPort: 6379
-                selector:
-                  app: redis
       patches:
-        - fromFieldPath: "spec.parameters.app"
-          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/app"
-        - fromFieldPath: "spec.parameters.env"
-          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/env"
-        - fromFieldPath: "spec.parameters.owner"
-          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/owner"
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.namespace
+          toFieldPath: spec.forProvider.manifest.metadata.namespace
 
-    - name: redis-deploy
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.claimRef.name
+          toFieldPath: spec.forProvider.manifest.metadata.name
+          transforms:
+            - type: string
+              string:
+                fmt: "%s-redis"
+
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.claimRef.name
+          toFieldPath: spec.forProvider.manifest.spec.selector.app
+
+    - name: redis-deployment
       base:
         apiVersion: kubernetes.crossplane.io/v1alpha2
         kind: Object
@@ -52,29 +61,40 @@ spec:
               apiVersion: apps/v1
               kind: Deployment
               metadata:
-                name: redis
-                namespace: pe-dev
-                labels:
-                  app: redis
+                name: placeholder
               spec:
                 replicas: 1
                 selector:
                   matchLabels:
-                    app: redis
+                    app: placeholder
                 template:
                   metadata:
                     labels:
-                      app: redis
+                      app: placeholder
                   spec:
                     containers:
                       - name: redis
                         image: redis:7-alpine
                         ports:
                           - containerPort: 6379
+                            name: redis
       patches:
-        - fromFieldPath: "spec.parameters.app"
-          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/app"
-        - fromFieldPath: "spec.parameters.env"
-          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/env"
-        - fromFieldPath: "spec.parameters.owner"
-          toFieldPath: "spec.forProvider.manifest.metadata.labels.idp.platform.io/owner"
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.namespace
+          toFieldPath: spec.forProvider.manifest.metadata.namespace
+
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.claimRef.name
+          toFieldPath: spec.forProvider.manifest.metadata.name
+          transforms:
+            - type: string
+              string:
+                fmt: "%s-redis"
+
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.claimRef.name
+          toFieldPath: spec.forProvider.manifest.spec.selector.matchLabels.app
+
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.claimRef.name
+          toFieldPath: spec.forProvider.manifest.spec.template.metadata.labels.app

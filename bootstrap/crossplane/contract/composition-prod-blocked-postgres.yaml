@@ -1,11 +1,15 @@
+# bootstrap/crossplane/contract/composition-prod-blocked-postgres.yaml
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
   name: postgres-prod-blocked
   labels:
     idp.platform.io/env: prod
+    idp.platform.io/policy: blocked
 spec:
   compositeTypeRef:
     apiVersion: idp.platform.io/v1alpha1
     kind: XPostgresInstance
-  # Phase 1: intentionally no resources. PROD is a contract only.
+
+  # Em Fase 1, PROD é “contrato + caminho”, mas bloqueado.
+  resources: []
