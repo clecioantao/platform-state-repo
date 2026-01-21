@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - providers/provider-kubernetes.yaml
+  - providers/providerconfig-incluster.yaml
+
+  - contract/xrd-postgresinstance.yaml
+  - contract/xrd-redisinstance.yaml
+
+  - contract/composition-dev-postgres.yaml
+  - contract/composition-dev-redis.yaml
+
+  - contract/composition-prod-blocked-postgres.yaml
+  - contract/composition-prod-blocked-redis.yaml

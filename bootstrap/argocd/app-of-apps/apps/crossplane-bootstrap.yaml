@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-bootstrap
+  namespace: argocd
+spec:
+  project: platform
+  source:
+    repoURL: https://github.com/clecioantao/platform-state-repo.git
+    targetRevision: main
+    path: bootstrap/crossplane
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: crossplane-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
