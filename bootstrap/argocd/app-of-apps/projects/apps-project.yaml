@@ -8,6 +8,10 @@ spec:
   sourceRepos:
     - "*"
   destinations:
+  - namespace: apps-dev
+    server: https://kubernetes.default.svc
+  - namespace: apps-prod
+    server: https://kubernetes.default.svc
     - namespace: pe-dev
       server: https://kubernetes.default.svc
     - namespace: pe-prod
