@@ -1,4 +1,3 @@
-# bootstrap/crossplane/contract/composition-dev-postgres.yaml
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
@@ -7,13 +6,13 @@ metadata:
     idp.platform.io/provider: kubernetes
     idp.platform.io/env: dev
 spec:
+  mode: Resources
+
   compositeTypeRef:
     apiVersion: idp.platform.io/v1alpha1
     kind: XPostgresInstance
 
-  # Resources Mode (clássico) — sem pipeline/functions
   resources:
-    # 1) Secret com credenciais (simples para lab)
     - name: postgres-secret
       base:
         apiVersion: kubernetes.crossplane.io/v1alpha2
@@ -53,7 +52,6 @@ spec:
           fromFieldPath: spec.parameters.database
           toFieldPath: spec.forProvider.manifest.stringData.database
 
-    # 2) Service
     - name: postgres-service
       base:
         apiVersion: kubernetes.crossplane.io/v1alpha2
@@ -91,7 +89,6 @@ spec:
           fromFieldPath: spec.claimRef.name
           toFieldPath: spec.forProvider.manifest.spec.selector.app
 
-    # 3) StatefulSet
     - name: postgres-statefulset
       base:
         apiVersion: kubernetes.crossplane.io/v1alpha2
