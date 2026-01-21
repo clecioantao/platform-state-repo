@@ -1,0 +1,19 @@
+apiVersion: idp.platform.io/v1alpha1
+kind: PostgresInstance
+metadata:
+  name: app1-postgres
+  namespace: apps-prod
+spec:
+  compositionSelector:
+    matchLabels:
+      idp.platform.io/provider: kubernetes
+      idp.platform.io/env: prod
+
+  parameters:
+    app: app1
+    env: prod
+    owner: clecio
+    size: small
+
+  writeConnectionSecretToRef:
+    name: app1-postgres-conn
