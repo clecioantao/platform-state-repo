@@ -6,12 +6,11 @@ metadata:
     idp.platform.io/provider: kubernetes
     idp.platform.io/env: dev
 spec:
-  mode: Pipeline
-
   compositeTypeRef:
     apiVersion: idp.platform.io/v1alpha1
     kind: XRedisInstance
 
+  mode: Pipeline
   pipeline:
     - step: render-resources
       functionRef:
@@ -33,6 +32,7 @@ spec:
                     kind: Service
                     metadata:
                       name: placeholder
+                      namespace: placeholder
                     spec:
                       selector:
                         app: placeholder
@@ -46,15 +46,15 @@ spec:
                 toFieldPath: spec.forProvider.manifest.metadata.namespace
 
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.claimRef.name
+                fromFieldPath: spec.parameters.app
                 toFieldPath: spec.forProvider.manifest.metadata.name
                 transforms:
-                  - string:
-                      type: Format
+                  - type: string
+                    string:
                       fmt: "%s-redis"
 
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.claimRef.name
+                fromFieldPath: spec.parameters.app
                 toFieldPath: spec.forProvider.manifest.spec.selector.app
 
           - name: redis-deployment
@@ -70,6 +70,7 @@ spec:
                     kind: Deployment
                     metadata:
                       name: placeholder
+                      namespace: placeholder
                     spec:
                       replicas: 1
                       selector:
@@ -92,17 +93,17 @@ spec:
                 toFieldPath: spec.forProvider.manifest.metadata.namespace
 
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.claimRef.name
+                fromFieldPath: spec.parameters.app
                 toFieldPath: spec.forProvider.manifest.metadata.name
                 transforms:
-                  - string:
-                      type: Format
+                  - type: string
+                    string:
                       fmt: "%s-redis"
 
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.claimRef.name
+                fromFieldPath: spec.parameters.app
                 toFieldPath: spec.forProvider.manifest.spec.selector.matchLabels.app
 
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.claimRef.name
+                fromFieldPath: spec.parameters.app
                 toFieldPath: spec.forProvider.manifest.spec.template.metadata.labels.app
