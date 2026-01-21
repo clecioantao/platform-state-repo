@@ -4,16 +4,30 @@ metadata:
   name: platform
   namespace: argocd
 spec:
-  description: "Platform bootstrap and contracts"
+  description: Platform bootstrap and platform services (Crossplane, base namespaces, platform apps)
+
+  # Repos permitidos
   sourceRepos:
-    - "*"
+    - https://github.com/clecioantao/platform-state-repo.git
+
+  # Destinos permitidos (cluster local + namespaces controlados)
   destinations:
-    - namespace: argocd
-      server: https://kubernetes.default.svc
-    - namespace: pe-dev
-      server: https://kubernetes.default.svc
-    - namespace: pe-prod
-      server: https://kubernetes.default.svc
+    - server: https://kubernetes.default.svc
+      namespace: argocd
+    - server: https://kubernetes.default.svc
+      namespace: crossplane-system
+    - server: https://kubernetes.default.svc
+      namespace: pe-dev
+    - server: https://kubernetes.default.svc
+      namespace: pe-prod
+
+  # Por simplicidade no lab, deixamos cluster-scoped liberado dentro do projeto.
+  # (XRDs/Compositions/Providers são cluster-scoped)
   clusterResourceWhitelist:
-    - group: "*"
-      kind: "*"
+    - group: '*'
+      kind: '*'
+
+  # Namespaced resources liberados
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
