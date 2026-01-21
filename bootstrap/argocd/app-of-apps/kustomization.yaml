@@ -8,3 +8,4 @@ resources:
   - apps/apps-dev.yaml
   - apps/platform-prod.yaml
   - apps/apps-prod.yaml
+  - apps/crossplane-bootstrap.yaml
