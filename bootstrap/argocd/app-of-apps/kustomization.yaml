@@ -4,10 +4,7 @@ resources:
   - root-app.yaml
   - projects/platform-project.yaml
   - projects/apps-project.yaml
-
-  # Child apps (environments)
-  - ../../../envs/dev/argocd-apps/platform-dev.yaml
-  - ../../../envs/dev/argocd-apps/apps-dev.yaml
-  - ../../../envs/prod/argocd-apps/platform-prod.yaml
-  - ../../../envs/prod/argocd-apps/apps-prod.yaml
-
+  - apps/platform-dev.yaml
+  - apps/apps-dev.yaml
+  - apps/platform-prod.yaml
+  - apps/apps-prod.yaml
