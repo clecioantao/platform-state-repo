@@ -4,18 +4,22 @@ metadata:
   name: apps
   namespace: argocd
 spec:
-  description: "Applications and app-scoped infrastructure"
+  description: Applications and app-scoped infrastructure
   sourceRepos:
-    - "*"
+    - '*'
+
+  # Permite deploy em namespaces de apps (novo) e mantém os anteriores (pe-*)
   destinations:
-  - namespace: apps-dev
-    server: https://kubernetes.default.svc
-  - namespace: apps-prod
-    server: https://kubernetes.default.svc
+    - namespace: apps-dev
+      server: https://kubernetes.default.svc
+    - namespace: apps-prod
+      server: https://kubernetes.default.svc
     - namespace: pe-dev
       server: https://kubernetes.default.svc
     - namespace: pe-prod
       server: https://kubernetes.default.svc
+
+  # (Mantém permissivo pro lab; em produção você provavelmente vai restringir)
   clusterResourceWhitelist:
-    - group: "*"
-      kind: "*"
+    - group: '*'
+      kind: '*'
