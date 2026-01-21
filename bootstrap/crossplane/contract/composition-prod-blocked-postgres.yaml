@@ -3,13 +3,20 @@ kind: Composition
 metadata:
   name: postgres-prod-blocked
   labels:
+    idp.platform.io/provider: kubernetes
     idp.platform.io/env: prod
-    idp.platform.io/policy: blocked
+    idp.platform.io/blocked: "true"
 spec:
-  mode: Resources
-
   compositeTypeRef:
     apiVersion: idp.platform.io/v1alpha1
     kind: XPostgresInstance
 
-  resources: []
+  mode: Pipeline
+  pipeline:
+    - step: blocked
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.crossplane.io/v1beta1
+        kind: Resources
+        resources: []

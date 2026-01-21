@@ -6,96 +6,102 @@ metadata:
     idp.platform.io/provider: kubernetes
     idp.platform.io/env: dev
 spec:
-  mode: Resources
-
   compositeTypeRef:
     apiVersion: idp.platform.io/v1alpha1
     kind: XRedisInstance
 
-  resources:
-    - name: redis-service
-      base:
-        apiVersion: kubernetes.crossplane.io/v1alpha2
-        kind: Object
-        spec:
-          providerConfigRef:
-            name: incluster
-          forProvider:
-            manifest:
-              apiVersion: v1
-              kind: Service
-              metadata:
-                name: placeholder
+  mode: Pipeline
+  pipeline:
+    - step: render-resources
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: redis-service
+            base:
+              apiVersion: kubernetes.crossplane.io/v1alpha2
+              kind: Object
               spec:
-                selector:
-                  app: placeholder
-                ports:
-                  - name: redis
-                    port: 6379
-                    targetPort: 6379
-      patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.namespace
-          toFieldPath: spec.forProvider.manifest.metadata.namespace
+                providerConfigRef:
+                  name: incluster
+                forProvider:
+                  manifest:
+                    apiVersion: v1
+                    kind: Service
+                    metadata:
+                      name: placeholder
+                    spec:
+                      selector:
+                        app: placeholder
+                      ports:
+                        - name: redis
+                          port: 6379
+                          targetPort: 6379
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.parameters.namespace
+                toFieldPath: spec.forProvider.manifest.metadata.namespace
 
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.claimRef.name
-          toFieldPath: spec.forProvider.manifest.metadata.name
-          transforms:
-            - type: string
-              string:
-                fmt: "%s-redis"
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.claimRef.name
+                toFieldPath: spec.forProvider.manifest.metadata.name
+                transforms:
+                  - type: string
+                    string:
+                      fmt: "%s-redis"
 
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.claimRef.name
-          toFieldPath: spec.forProvider.manifest.spec.selector.app
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.claimRef.name
+                toFieldPath: spec.forProvider.manifest.spec.selector.app
 
-    - name: redis-deployment
-      base:
-        apiVersion: kubernetes.crossplane.io/v1alpha2
-        kind: Object
-        spec:
-          providerConfigRef:
-            name: incluster
-          forProvider:
-            manifest:
-              apiVersion: apps/v1
-              kind: Deployment
-              metadata:
-                name: placeholder
+          - name: redis-deployment
+            base:
+              apiVersion: kubernetes.crossplane.io/v1alpha2
+              kind: Object
               spec:
-                replicas: 1
-                selector:
-                  matchLabels:
-                    app: placeholder
-                template:
-                  metadata:
-                    labels:
-                      app: placeholder
-                  spec:
-                    containers:
-                      - name: redis
-                        image: redis:7-alpine
-                        ports:
-                          - containerPort: 6379
-                            name: redis
-      patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.namespace
-          toFieldPath: spec.forProvider.manifest.metadata.namespace
+                providerConfigRef:
+                  name: incluster
+                forProvider:
+                  manifest:
+                    apiVersion: apps/v1
+                    kind: Deployment
+                    metadata:
+                      name: placeholder
+                    spec:
+                      replicas: 1
+                      selector:
+                        matchLabels:
+                          app: placeholder
+                      template:
+                        metadata:
+                          labels:
+                            app: placeholder
+                        spec:
+                          containers:
+                            - name: redis
+                              image: redis:7-alpine
+                              ports:
+                                - containerPort: 6379
+                                  name: redis
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.parameters.namespace
+                toFieldPath: spec.forProvider.manifest.metadata.namespace
 
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.claimRef.name
-          toFieldPath: spec.forProvider.manifest.metadata.name
-          transforms:
-            - type: string
-              string:
-                fmt: "%s-redis"
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.claimRef.name
+                toFieldPath: spec.forProvider.manifest.metadata.name
+                transforms:
+                  - type: string
+                    string:
+                      fmt: "%s-redis"
 
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.claimRef.name
-          toFieldPath: spec.forProvider.manifest.spec.selector.matchLabels.app
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.claimRef.name
+                toFieldPath: spec.forProvider.manifest.spec.selector.matchLabels.app
 
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.claimRef.name
-          toFieldPath: spec.forProvider.manifest.spec.template.metadata.labels.app
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.claimRef.name
+                toFieldPath: spec.forProvider.manifest.spec.template.metadata.labels.app
