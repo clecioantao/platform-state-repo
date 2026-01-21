@@ -16,7 +16,7 @@ spec:
       functionRef:
         name: function-patch-and-transform
       input:
-        apiVersion: pt.crossplane.io/v1beta1
+        apiVersion: pt.fn.crossplane.io/v1beta1
         kind: Resources
         resources:
           - name: postgres-secret
@@ -32,25 +32,24 @@ spec:
                     kind: Secret
                     metadata:
                       name: placeholder
-                      namespace: placeholder
+                      namespace: default
                     type: Opaque
                     stringData:
                       username: postgres
                       password: postgres
                       database: appdb
             patches:
-              # ✅ Namespace vem do claimRef.namespace (apps-dev)
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.claimRef.namespace
                 toFieldPath: spec.forProvider.manifest.metadata.namespace
 
-              # ✅ Nome do Secret baseado no app
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.parameters.app
+                fromFieldPath: spec.claimRef.name
                 toFieldPath: spec.forProvider.manifest.metadata.name
                 transforms:
                   - type: string
                     string:
+                      type: Format
                       fmt: "%s-pg-secret"
 
           - name: postgres-service
@@ -66,7 +65,7 @@ spec:
                     kind: Service
                     metadata:
                       name: placeholder
-                      namespace: placeholder
+                      namespace: default
                     spec:
                       selector:
                         app: placeholder
@@ -80,15 +79,16 @@ spec:
                 toFieldPath: spec.forProvider.manifest.metadata.namespace
 
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.parameters.app
+                fromFieldPath: spec.claimRef.name
                 toFieldPath: spec.forProvider.manifest.metadata.name
                 transforms:
                   - type: string
                     string:
+                      type: Format
                       fmt: "%s-postgres"
 
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.parameters.app
+                fromFieldPath: spec.claimRef.name
                 toFieldPath: spec.forProvider.manifest.spec.selector.app
 
           - name: postgres-statefulset
@@ -104,7 +104,7 @@ spec:
                     kind: StatefulSet
                     metadata:
                       name: placeholder
-                      namespace: placeholder
+                      namespace: default
                     spec:
                       serviceName: placeholder
                       replicas: 1
@@ -124,11 +124,20 @@ spec:
                                   name: postgres
                               env:
                                 - name: POSTGRES_USER
-                                  value: postgres
+                                  valueFrom:
+                                    secretKeyRef:
+                                      name: placeholder
+                                      key: username
                                 - name: POSTGRES_PASSWORD
-                                  value: postgres
+                                  valueFrom:
+                                    secretKeyRef:
+                                      name: placeholder
+                                      key: password
                                 - name: POSTGRES_DB
-                                  value: appdb
+                                  valueFrom:
+                                    secretKeyRef:
+                                      name: placeholder
+                                      key: database
                               volumeMounts:
                                 - name: data
                                   mountPath: /var/lib/postgresql/data
@@ -146,25 +155,54 @@ spec:
                 toFieldPath: spec.forProvider.manifest.metadata.namespace
 
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.parameters.app
+                fromFieldPath: spec.claimRef.name
                 toFieldPath: spec.forProvider.manifest.metadata.name
                 transforms:
                   - type: string
                     string:
+                      type: Format
                       fmt: "%s-postgres"
 
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.parameters.app
+                fromFieldPath: spec.claimRef.name
                 toFieldPath: spec.forProvider.manifest.spec.serviceName
                 transforms:
                   - type: string
                     string:
+                      type: Format
                       fmt: "%s-postgres"
 
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.parameters.app
+                fromFieldPath: spec.claimRef.name
                 toFieldPath: spec.forProvider.manifest.spec.selector.matchLabels.app
 
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.parameters.app
+                fromFieldPath: spec.claimRef.name
                 toFieldPath: spec.forProvider.manifest.spec.template.metadata.labels.app
+
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.claimRef.name
+                toFieldPath: spec.forProvider.manifest.spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.name
+                transforms:
+                  - type: string
+                    string:
+                      type: Format
+                      fmt: "%s-pg-secret"
+
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.claimRef.name
+                toFieldPath: spec.forProvider.manifest.spec.template.spec.containers[0].env[1].valueFrom.secretKeyRef.name
+                transforms:
+                  - type: string
+                    string:
+                      type: Format
+                      fmt: "%s-pg-secret"
+
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.claimRef.name
+                toFieldPath: spec.forProvider.manifest.spec.template.spec.containers[0].env[2].valueFrom.secretKeyRef.name
+                transforms:
+                  - type: string
+                    string:
+                      type: Format
+                      fmt: "%s-pg-secret"

@@ -16,7 +16,7 @@ spec:
       functionRef:
         name: function-patch-and-transform
       input:
-        apiVersion: pt.crossplane.io/v1beta1
+        apiVersion: pt.fn.crossplane.io/v1beta1
         kind: Resources
         resources:
           - name: redis-service
@@ -32,7 +32,7 @@ spec:
                     kind: Service
                     metadata:
                       name: placeholder
-                      namespace: placeholder
+                      namespace: default
                     spec:
                       selector:
                         app: placeholder
@@ -46,15 +46,16 @@ spec:
                 toFieldPath: spec.forProvider.manifest.metadata.namespace
 
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.parameters.app
+                fromFieldPath: spec.claimRef.name
                 toFieldPath: spec.forProvider.manifest.metadata.name
                 transforms:
                   - type: string
                     string:
+                      type: Format
                       fmt: "%s-redis"
 
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.parameters.app
+                fromFieldPath: spec.claimRef.name
                 toFieldPath: spec.forProvider.manifest.spec.selector.app
 
           - name: redis-deployment
@@ -70,7 +71,7 @@ spec:
                     kind: Deployment
                     metadata:
                       name: placeholder
-                      namespace: placeholder
+                      namespace: default
                     spec:
                       replicas: 1
                       selector:
@@ -93,17 +94,18 @@ spec:
                 toFieldPath: spec.forProvider.manifest.metadata.namespace
 
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.parameters.app
+                fromFieldPath: spec.claimRef.name
                 toFieldPath: spec.forProvider.manifest.metadata.name
                 transforms:
                   - type: string
                     string:
+                      type: Format
                       fmt: "%s-redis"
 
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.parameters.app
+                fromFieldPath: spec.claimRef.name
                 toFieldPath: spec.forProvider.manifest.spec.selector.matchLabels.app
 
               - type: FromCompositeFieldPath
-                fromFieldPath: spec.parameters.app
+                fromFieldPath: spec.claimRef.name
                 toFieldPath: spec.forProvider.manifest.spec.template.metadata.labels.app
