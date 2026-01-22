@@ -1,0 +1,13 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{ values.component_id }}
+  title: ${{ values.component_id }}
+  description: GitOps state for ${{ values.component_id }}
+  annotations:
+    idp.platform.io/app: ${{ values.component_id }}
+    idp.platform.io/env: ${{ values.env }}
+spec:
+  type: resource
+  owner: ${{ values.owner }}
+  lifecycle: experimental

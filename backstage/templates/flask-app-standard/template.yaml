@@ -2,40 +2,112 @@ apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
   name: flask-app-standard
-  title: Flask App – Standard
-  description: "Cria uma aplicação Flask + GitOps manifests + Claims (DEV) no platform-state-repo"
+  title: "Create App: Flask (Standard)"
+  description: "Cria um novo repositório da aplicação (Flask) e abre PR no platform-state-repo criando a estrutura GitOps vinculada."
+  tags:
+    - flask
+    - idp
+    - gitops
 spec:
-  owner: platform-team
+  owner: group:default/platform-team
   type: service
 
   parameters:
-    - title: Informações da aplicação
-      required:
-        - appName
-        - owner
-        - environment
+    - title: "Dados da Aplicação"
+      required: ["component_id", "owner", "repoUrl", "environment"]
       properties:
-        appName:
-          title: Nome da aplicação (slug)
+        component_id:
+          title: "Nome (slug)"
           type: string
           description: "ex: payments-api"
-        owner:
-          title: Time/Owner
+          ui:field: EntityNamePicker
+        description:
+          title: "Descrição"
           type: string
-          description: "ex: team-a"
+        owner:
+          title: "Owner"
+          type: string
+          ui:field: OwnerPicker
+          ui:options:
+            allowedKinds: ["Group"]
         environment:
-          title: Ambiente
+          title: "Ambiente inicial"
           type: string
           enum: ["dev", "prod"]
-        size:
-          title: Sizing
+          default: "dev"
+        repoUrl:
+          title: "Repositório da aplicação"
           type: string
-          enum: ["small", "medium", "large"]
-          default: "small"
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts: ["github.com"]
 
-  steps: []
+    - title: "GitOps (State Repo)"
+      required: ["stateRepoUrl"]
+      properties:
+        stateRepoUrl:
+          title: "State Repo (GitOps)"
+          type: string
+          description: "Repo onde os manifests GitOps serão versionados"
+          default: "github.com?owner=clecioantao&repo=platform-state-repo"
+
+  steps:
+    - id: fetch-app-skeleton
+      name: "Gerar skeleton do repo da aplicação"
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          component_id: ${{ parameters.component_id }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+
+    - id: publish-app
+      name: "Publicar repositório da aplicação"
+      action: publish:github
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        description: ${{ parameters.description }}
+        defaultBranch: main
+
+    - id: register-app
+      name: "Registrar app no catálogo"
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish-app.output.repoContentsUrl }}
+        catalogInfoPath: "/catalog-info.yaml"
+
+    # Agora a parte GitOps: abrir PR no platform-state-repo criando estrutura em apps/dev ou apps/prod
+    - id: fetch-gitops-skeleton
+      name: "Gerar estrutura GitOps vinculada (state repo)"
+      action: fetch:template
+      input:
+        url: ./skeleton-gitops
+        values:
+          component_id: ${{ parameters.component_id }}
+          owner: ${{ parameters.owner }}
+          env: ${{ parameters.environment }}
+
+    - id: pr-state-repo
+      name: "Abrir PR no platform-state-repo (criar diretório da app)"
+      action: publish:github:pull-request
+      input:
+        repoUrl: ${{ parameters.stateRepoUrl }}
+        branchName: backstage/create-app-${{ parameters.component_id }}-${{ parameters.environment }}
+        title: "GitOps: create app folder ${{ parameters.component_id }} (${{ parameters.environment }})"
+        description: |
+          Cria estrutura GitOps da app no state repo.
+          App repo: ${{ steps.publish-app.output.remoteUrl }}
+        targetPath: apps/${{ parameters.environment }}/${{ parameters.component_id }}
+        sourcePath: .
+        token: ${{ secrets.GITHUB_TOKEN }}
+
   output:
-    text:
-      - title: Próximos passos
-        content: |
-          Template ainda será finalizado em um step futuro (Backstage).
+    links:
+      - title: "Repo da Aplicação"
+        url: ${{ steps.publish-app.output.remoteUrl }}
+      - title: "Entidade no Catálogo"
+        icon: catalog
+        entityRef: ${{ steps.register-app.output.entityRef }}
+      - title: "PR no platform-state-repo"
+        url: ${{ steps.pr-state-repo.output.remoteUrl }}

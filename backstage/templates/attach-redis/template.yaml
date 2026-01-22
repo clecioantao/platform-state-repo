@@ -1,0 +1,80 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: attach-redis
+  title: "Attach: Redis to an App"
+  description: "Acopla Redis a uma aplicação existente (GitOps no platform-state-repo), mantendo vínculo Dia-0/Dia-1/Dia-2."
+  tags:
+    - redis
+    - idp
+    - gitops
+spec:
+  owner: group:default/platform-team
+  type: service
+
+  parameters:
+    - title: "Selecione a aplicação"
+      required: ["appEntity", "env", "size"]
+      properties:
+        appEntity:
+          title: "Aplicação"
+          type: string
+          ui:field: EntityPicker
+          ui:options:
+            catalogFilter:
+              kind: Component
+        env:
+          title: "Ambiente"
+          type: string
+          enum: ["dev", "prod"]
+          default: "dev"
+        size:
+          title: "Size"
+          type: string
+          enum: ["small", "medium", "large"]
+          default: "small"
+
+    - title: "State Repo"
+      required: ["stateRepoUrl"]
+      properties:
+        stateRepoUrl:
+          title: "platform-state-repo"
+          type: string
+          default: "github.com?owner=clecioantao&repo=platform-state-repo"
+
+  steps:
+    - id: read-app
+      name: "Ler metadados da app (para achar path GitOps)"
+      action: catalog:fetch
+      input:
+        entityRef: ${{ parameters.appEntity }}
+
+    - id: fetch
+      name: "Gerar manifest do Redis (claim)"
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          appName: ${{ steps.read-app.output.entity.metadata.name }}
+          owner: ${{ steps.read-app.output.entity.spec.owner }}
+          env: ${{ parameters.env }}
+          size: ${{ parameters.size }}
+
+    - id: pr
+      name: "Abrir PR no state repo (adicionar Redis)"
+      action: publish:github:pull-request
+      input:
+        repoUrl: ${{ parameters.stateRepoUrl }}
+        branchName: backstage/attach-redis-${{ steps.read-app.output.entity.metadata.name }}-${{ parameters.env }}
+        title: "Attach Redis: ${{ steps.read-app.output.entity.metadata.name }} (${{ parameters.env }})"
+        description: "Provisionamento GitOps de Redis vinculado à app via Backstage."
+        targetPath: ${{ parameters.env == 'dev'
+          ? steps.read-app.output.entity.metadata.annotations['idp.platform.io/app-path-dev']
+          : steps.read-app.output.entity.metadata.annotations['idp.platform.io/app-path-prod'] }}/gitops/infra
+        sourcePath: .
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+  output:
+    links:
+      - title: "PR no platform-state-repo"
+        url: ${{ steps.pr.output.remoteUrl }}

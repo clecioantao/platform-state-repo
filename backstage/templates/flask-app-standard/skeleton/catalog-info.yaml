@@ -1,9 +1,14 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: {{appName}}
-  description: "Flask app (Standard)"
+  name: ${{ values.component_id }}
+  title: ${{ values.component_id }}
+  description: ${{ values.description }}
+  annotations:
+    idp.platform.io/state-repo: "github.com?owner=clecioantao&repo=platform-state-repo"
+    idp.platform.io/app-path-dev: "apps/dev/${{ values.component_id }}"
+    idp.platform.io/app-path-prod: "apps/prod/${{ values.component_id }}"
 spec:
   type: service
   lifecycle: experimental
-  owner: {{owner}}
+  owner: ${{ values.owner }}

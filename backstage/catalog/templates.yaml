@@ -5,4 +5,6 @@ metadata:
 spec:
   type: url
   targets:
-    - https://github.com/<org>/platform-state-repo/blob/main/backstage/templates/flask-app-standard/template.yaml
+    - https://github.com/clecioantao/platform-state-repo/blob/main/backstage/templates/flask-app-standard/template.yaml
+    - https://github.com/clecioantao/platform-state-repo/blob/main/backstage/templates/attach-postgres/template.yaml
+    - https://github.com/clecioantao/platform-state-repo/blob/main/backstage/templates/attach-redis/template.yaml

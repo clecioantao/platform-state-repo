@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{appName}}-placeholder
-data:
-  message: "App workload será definido em steps futuros."

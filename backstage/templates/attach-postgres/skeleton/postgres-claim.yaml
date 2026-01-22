@@ -1,0 +1,16 @@
+apiVersion: idp.platform.io/v1alpha1
+kind: PostgresInstance
+metadata:
+  name: ${{ values.appName }}-postgres
+  namespace: ${{ values.env == 'dev' ? 'apps-dev' : 'apps-prod' }}
+  labels:
+    idp.platform.io/app: ${{ values.appName }}
+    idp.platform.io/env: ${{ values.env }}
+spec:
+  parameters:
+    app: ${{ values.appName }}
+    env: ${{ values.env }}
+    owner: ${{ values.owner }}
+    size: ${{ values.size }}
+    dbName: ${{ values.dbName }}
+    backupEnabled: ${{ values.backupEnabled }}

@@ -1,0 +1,101 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: attach-postgres
+  title: "Attach: PostgreSQL to an App"
+  description: "Acopla Postgres a uma aplicação existente (GitOps no platform-state-repo), mantendo vínculo Dia-0/Dia-1/Dia-2."
+  tags:
+    - postgres
+    - idp
+    - gitops
+spec:
+  owner: group:default/platform-team
+  type: service
+
+  parameters:
+    - title: "Selecione a aplicação"
+      required: ["appEntity", "env", "size"]
+      properties:
+        appEntity:
+          title: "Aplicação"
+          type: string
+          ui:field: EntityPicker
+          ui:options:
+            catalogFilter:
+              kind: Component
+        env:
+          title: "Ambiente"
+          type: string
+          enum: ["dev", "prod"]
+          default: "dev"
+        size:
+          title: "Size"
+          type: string
+          enum: ["small", "medium", "large"]
+          default: "small"
+        dbName:
+          title: "DB Name"
+          type: string
+          default: "postgres"
+        backupEnabled:
+          title: "Backup habilitado?"
+          type: boolean
+          default: false
+
+    - title: "State Repo"
+      required: ["stateRepoUrl"]
+      properties:
+        stateRepoUrl:
+          title: "platform-state-repo"
+          type: string
+          default: "github.com?owner=clecioantao&repo=platform-state-repo"
+
+  steps:
+    - id: read-app
+      name: "Ler metadados da app (para achar path GitOps)"
+      action: catalog:fetch
+      input:
+        entityRef: ${{ parameters.appEntity }}
+
+    - id: compute
+      name: "Calcular paths"
+      action: debug:log
+      input:
+        message: |
+          appEntity=${{ parameters.appEntity }}
+          env=${{ parameters.env }}
+          appPathDev=${{ steps.read-app.output.entity.metadata.annotations['idp.platform.io/app-path-dev'] }}
+          appPathProd=${{ steps.read-app.output.entity.metadata.annotations['idp.platform.io/app-path-prod'] }}
+
+    - id: fetch
+      name: "Gerar manifest do Postgres (claim)"
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          appName: ${{ steps.read-app.output.entity.metadata.name }}
+          owner: ${{ steps.read-app.output.entity.spec.owner }}
+          env: ${{ parameters.env }}
+          size: ${{ parameters.size }}
+          dbName: ${{ parameters.dbName }}
+          backupEnabled: ${{ parameters.backupEnabled }}
+
+    - id: pr
+      name: "Abrir PR no state repo (adicionar Postgres)"
+      action: publish:github:pull-request
+      input:
+        repoUrl: ${{ parameters.stateRepoUrl }}
+        branchName: backstage/attach-postgres-${{ steps.read-app.output.entity.metadata.name }}-${{ parameters.env }}
+        title: "Attach Postgres: ${{ steps.read-app.output.entity.metadata.name }} (${{ parameters.env }})"
+        description: "Provisionamento GitOps de Postgres vinculado à app via Backstage."
+        # escolhe targetPath baseado no env, usando as annotations da app
+        targetPath: ${{ parameters.env == 'dev'
+          ? steps.read-app.output.entity.metadata.annotations['idp.platform.io/app-path-dev']
+          : steps.read-app.output.entity.metadata.annotations['idp.platform.io/app-path-prod'] }}/gitops/infra
+        sourcePath: .
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+  output:
+    links:
+      - title: "PR no platform-state-repo"
+        url: ${{ steps.pr.output.remoteUrl }}
