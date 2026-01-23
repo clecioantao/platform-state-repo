@@ -1,0 +1,13 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: python-app-41-del
+  title: python-app-41-del
+  description: GitOps state for python-app-41-del
+  annotations:
+    idp.platform.io/app: python-app-41-del
+    idp.platform.io/env: 
+spec:
+  type: resource
+  owner: group:default/backstage
+  lifecycle: experimental
