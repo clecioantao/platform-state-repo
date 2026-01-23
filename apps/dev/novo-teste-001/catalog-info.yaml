@@ -1,0 +1,14 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: novo-teste-001
+  title: novo-teste-001
+  description: novo-teste-001
+  annotations:
+    idp.platform.io/state-repo: "github.com?owner=clecioantao&repo=platform-state-repo"
+    idp.platform.io/app-path-dev: "apps/dev/novo-teste-001"
+    idp.platform.io/app-path-prod: "apps/prod/novo-teste-001"
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:default/backstage
