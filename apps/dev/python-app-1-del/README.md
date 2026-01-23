@@ -1,0 +1,6 @@
+# python-app-1-del
+
+Flask App (Standard) — scaffold gerado via Backstage.
+
+Este repositório representa a aplicação (código).
+Infraestrutura (Postgres/Redis etc) é gerenciada via IDP e versionada no platform-state-repo.
