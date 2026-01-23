@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: xxxxx-1-app-placeholder
+  namespace: apps-dev
+  labels:
+    idp.platform.io/app: xxxxx-1
+    idp.platform.io/env: "dev"
+    idp.platform.io/owner: "group:default/boxoffice"
+data:
+  message: "Workload da aplicação será definido em fases futuras."
+  app: "xxxxx-1"
+  env: "dev"
