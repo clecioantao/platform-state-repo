@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: python-app-111-del-app-placeholder
-data:
-  message: "Workload da aplicação será definido em fases futuras."

@@ -3,7 +3,5 @@ kind: Location
 metadata:
   name: platform-state-catalog
 spec:
-  type: url
-  targets:
-    - https://github.com/clecioantao/platform-state-repo/blob/main/apps/dev/*/catalog-info.yaml
-    - https://github.com/clecioantao/platform-state-repo/blob/main/apps/prod/*/catalog-info.yaml
+  type: file
+  targets: []

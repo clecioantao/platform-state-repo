@@ -2,12 +2,13 @@ apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
   name: flask-app-standard
-  title: "Create App: Flask (Standard)"
+  title: "Create App: Flask (Standard) v7"
   description: "Cria um novo repositório da aplicação (Flask) e abre PR no platform-state-repo criando a estrutura GitOps vinculada."
   tags:
     - flask
     - idp
     - gitops
+
 spec:
   owner: group:default/platform-team
   type: service
@@ -52,7 +53,7 @@ spec:
           default: "github.com?owner=clecioantao&repo=platform-state-repo"
 
   steps:
-    - id: fetch-app-skeleton
+    - id: fetch_app_skeleton
       name: "Gerar skeleton do repo da aplicação"
       action: fetch:template
       input:
@@ -62,7 +63,7 @@ spec:
           description: ${{ parameters.description }}
           owner: ${{ parameters.owner }}
 
-    - id: publish-app
+    - id: publish_app
       name: "Publicar repositório da aplicação"
       action: publish:github
       input:
@@ -70,25 +71,33 @@ spec:
         description: ${{ parameters.description }}
         defaultBranch: main
 
-    - id: register-app
+    - id: debug_publish_output
+      name: "Debug publish output"
+      action: debug:log
+      input:
+        message: |
+          remoteUrl=${{ steps.publish_app.output.remoteUrl }}
+          repoContentsUrl=${{ steps.publish_app.output.repoContentsUrl }}
+
+    - id: register_app
       name: "Registrar app no catálogo"
       action: catalog:register
       input:
-        repoContentsUrl: ${{ steps.publish-app.output.repoContentsUrl }}
+        repoContentsUrl: ${{ steps.publish_app.output.repoContentsUrl }}
         catalogInfoPath: "/catalog-info.yaml"
 
-    # Agora a parte GitOps: abrir PR no platform-state-repo criando estrutura em apps/dev ou apps/prod
-    - id: fetch-gitops-skeleton
-      name: "Gerar estrutura GitOps vinculada (state repo)"
+    # GitOps / State Repo
+    - id: fetch_gitops_skeleton
       action: fetch:template
       input:
-        url: ./skeleton-gitops
+        url: ./skeleton-gitops/gitops
+        targetPath: out
         values:
           component_id: ${{ parameters.component_id }}
           owner: ${{ parameters.owner }}
           env: ${{ parameters.environment }}
 
-    - id: pr-state-repo
+    - id: pr_state_repo
       name: "Abrir PR no platform-state-repo (criar diretório da app)"
       action: publish:github:pull-request
       input:
@@ -97,7 +106,7 @@ spec:
         title: "GitOps: create app folder ${{ parameters.component_id }} (${{ parameters.environment }})"
         description: |
           Cria estrutura GitOps da app no state repo.
-          App repo: ${{ steps.publish-app.output.remoteUrl }}
+          App repo: ${{ steps.publish_app.output.remoteUrl }}
         targetPath: apps/${{ parameters.environment }}/${{ parameters.component_id }}
         sourcePath: .
         token: ${{ secrets.GITHUB_TOKEN }}
@@ -105,9 +114,9 @@ spec:
   output:
     links:
       - title: "Repo da Aplicação"
-        url: ${{ steps.publish-app.output.remoteUrl }}
+        url: ${{ steps.publish_app.output.remoteUrl }}
       - title: "Entidade no Catálogo"
         icon: catalog
-        entityRef: ${{ steps.register-app.output.entityRef }}
+        entityRef: ${{ steps.register_app.output.entityRef }}
       - title: "PR no platform-state-repo"
-        url: ${{ steps.pr-state-repo.output.remoteUrl }}
+        url: ${{ steps.pr_state_repo.output.remoteUrl }}

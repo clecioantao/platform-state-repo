@@ -154,6 +154,7 @@ catalog:
         - System
         - Domain
         - Location
+        - Template
   providers:
     azureBlob:
       accountName: ${ACCOUNT_NAME}
@@ -198,11 +199,11 @@ catalog:
       rules:
         - allow: [Template]
 
-    # Platform State Repo
+    # Platform State Repo (arquivos estão no ROOT do monorepo)
     - type: file
-      target: ./catalog/locations.yaml
+      target: ../../catalog/locations.yaml
     - type: file
-      target: ./catalog/templates.yaml
+      target: ../../catalog/templates.yaml
 
 scaffolder:
   auditor:

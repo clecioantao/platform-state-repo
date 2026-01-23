@@ -3,8 +3,8 @@ kind: Location
 metadata:
   name: platform-templates
 spec:
-  type: url
+  type: file
   targets:
-    - https://github.com/clecioantao/platform-state-repo/blob/main/backstage/templates/flask-app-standard/template.yaml
-    - https://github.com/clecioantao/platform-state-repo/blob/main/backstage/templates/attach-postgres/template.yaml
-    - https://github.com/clecioantao/platform-state-repo/blob/main/backstage/templates/attach-redis/template.yaml
+    - ../templates/flask-app-standard/template.yaml
+    - ../templates/attach-postgres/template.yaml
+    - ../templates/attach-redis/template.yaml
