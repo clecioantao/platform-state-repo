@@ -1,0 +1,12 @@
+apiVersion: idp.platform.io/v1alpha1
+kind: PostgresInstance
+metadata:
+  name: xxxxx-1-postgres
+  namespace: apps-dev
+  labels:
+    idp.platform.io/app: xxxxx-1
+    idp.platform.io/env: "dev"
+    idp.platform.io/owner: "group:default/boxoffice"
+spec:
+  plan: dev
+  database: xxxxx-1
