@@ -2,7 +2,7 @@ apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
   name: flask-app-standard
-  title: "Create App: Flask (Standard) v11"
+  title: "Create App: Flask (Standard) v12"
   description: "Cria um novo repositório da aplicação (Flask) e abre PR no platform-state-repo criando a estrutura GitOps vinculada."
   tags:
     - flask
@@ -46,6 +46,7 @@ spec:
           ui:field: RepoUrlPicker
           ui:options:
             allowedHosts: ["github.com"]
+            allowedOwners: ["clecioantao"]
 
     - title: "GitOps (State Repo)"
       required: ["stateRepoUrl"]
