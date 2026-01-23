@@ -8,6 +8,7 @@ metadata:
     idp.platform.io/state-repo: "github.com?owner=clecioantao&repo=platform-state-repo"
     idp.platform.io/app-path-dev: "apps/dev/python-app-41-del"
     idp.platform.io/app-path-prod: "apps/prod/python-app-41-del"
+    idp.platform.io/env: "dev"
 spec:
   type: service
   lifecycle: experimental
