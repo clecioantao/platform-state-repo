@@ -2,7 +2,7 @@ apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
   name: flask-app-standard
-  title: "Create App: Flask (Standard) v7"
+  title: "Create App: Flask (Standard) v8"
   description: "Cria um novo repositório da aplicação (Flask) e abre PR no platform-state-repo criando a estrutura GitOps vinculada."
   tags:
     - flask
@@ -94,7 +94,6 @@ spec:
         targetPath: out
         values:
           component_id: ${{ parameters.component_id }}
-          owner: ${{ parameters.owner }}
           env: ${{ parameters.environment }}
 
     - id: pr_state_repo
@@ -108,7 +107,7 @@ spec:
           Cria estrutura GitOps da app no state repo.
           App repo: ${{ steps.publish_app.output.remoteUrl }}
         targetPath: apps/${{ parameters.environment }}/${{ parameters.component_id }}
-        sourcePath: .
+        sourcePath: out
         token: ${{ secrets.GITHUB_TOKEN }}
 
   output:
