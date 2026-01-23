@@ -1,0 +1,14 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: python-app-111-del
+  title: python-app-111-del
+  description: Creates a NestJS Service together with a PostgreSQL database
+  annotations:
+    idp.platform.io/state-repo: "github.com?owner=clecioantao&repo=platform-state-repo"
+    idp.platform.io/app-path-dev: "apps/dev/python-app-111-del"
+    idp.platform.io/app-path-prod: "apps/prod/python-app-111-del"
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:default/acme-corp
